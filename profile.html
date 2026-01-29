@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - CompEarner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .profile-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: calc(var(--nav-height) + 2rem) 2rem 4rem;
+        }
+
+        .profile-header {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid var(--cyan);
+            box-shadow: 0 0 30px var(--cyan-glow);
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-username {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--cyan), var(--green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-stats-row {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .profile-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .profile-stat-value {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--cyan);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .stat-card-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card-value {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--green);
+        }
+
+        .match-history-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--cyan), var(--green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .linked-accounts-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .account-link-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem;
+            background: rgba(0, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .account-link-item:hover {
+            border-color: var(--cyan);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+
+        .account-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--cyan), var(--green));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        .account-info {
+            flex: 1;
+        }
+
+        .account-game-name {
+            font-family: var(--font-display);
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .account-status {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .account-tag {
+            font-family: monospace;
+            color: var(--cyan);
+            background: rgba(0, 255, 255, 0.1);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .link-input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .link-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: monospace;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .link-input:focus {
+            outline: none;
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.1);
+        }
+
+        .btn-link {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--cyan), var(--green));
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .btn-link:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-unlink {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 0, 0, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-unlink:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .link-success {
+            color: var(--success);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .link-error {
+            color: var(--danger);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="/" style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="brand-icon">⚡</span>
+                    <span class="brand-text">COMPEARNER</span>
+                </a>
+            </div>
+            
+            <div class="nav-actions">
+                <a href="/" class="btn-secondary">Back to Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="profile-container">
+        <div class="profile-header">
+            <img src="" alt="Profile" class="profile-avatar" id="profileAvatar">
+            <div class="profile-info">
+                <h1 class="profile-username" id="profileUsername">Loading...</h1>
+                <p style="color: var(--text-secondary);" id="profileEmail"></p>
+                <div class="profile-stats-row">
+                    <div class="profile-stat">
+                        <span class="profile-stat-label">Member Since</span>
+                        <span class="profile-stat-value" id="memberSince">-</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="profile-stat-label">Win Rate</span>
+                        <span class="profile-stat-value" id="winRate">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-label">Balance</div>
+                <div class="stat-card-value" id="profileBalance">$0.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-label">Wins</div>
+                <div class="stat-card-value" style="color: var(--success);" id="profileWins">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-label">Losses</div>
+                <div class="stat-card-value" style="color: var(--danger);" id="profileLosses">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-label">Total Wagered</div>
+                <div class="stat-card-value" id="profileWagered">$0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-label">Total Won</div>
+                <div class="stat-card-value" id="profileWon">$0</div>
+            </div>
+        </div>
+
+        <div class="linked-accounts-section">
+            <h2 class="section-title">🎮 LINKED GAME ACCOUNTS</h2>
+            
+            <div class="account-link-item">
+                <div class="account-icon">👑</div>
+                <div class="account-info">
+                    <div class="account-game-name">Clash Royale</div>
+                    <div class="account-status" id="clashRoyaleStatus">
+                        <span id="clashRoyaleLinked" style="display: none;">
+                            Linked: <span class="account-tag" id="clashRoyaleTag"></span>
+                            <div style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+                                Player: <span id="clashRoyaleName" style="color: var(--cyan);"></span>
+                            </div>
+                        </span>
+                        <span id="clashRoyaleNotLinked">Not linked</span>
+                    </div>
+                    <div class="link-input-group" id="clashRoyaleInputGroup" style="display: none;">
+                        <input 
+                            type="text" 
+                            class="link-input" 
+                            id="clashRoyaleInput" 
+                            placeholder="Enter your player tag (e.g., #2PP)"
+                        >
+                        <button class="btn-link" id="linkClashRoyaleBtn">Link Account</button>
+                    </div>
+                    <div class="link-success" id="clashRoyaleSuccess">✓ Account linked successfully!</div>
+                    <div class="link-error" id="clashRoyaleError"></div>
+                </div>
+                <button class="btn-unlink" id="unlinkClashRoyaleBtn" style="display: none;">Unlink</button>
+                <button class="btn-link" id="showClashRoyaleLinkBtn" onclick="showClashRoyaleInput()">Link Account</button>
+            </div>
+
+            <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 1.5rem;">
+                💡 Link your game accounts to enable automatic match verification. After both players link their accounts, 
+                the system will check recent matches and automatically award prizes to winners.
+            </p>
+        </div>
+
+        <div class="match-history-section">
+            <h2 class="section-title">⚔️ RECENT CLASH ROYALE MATCHES (LAST 3)</h2>
+            <div id="matchHistory">
+                <div class="empty-state">Link your Clash Royale account to see match history!</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000/api'
+            : '/api';
+
+        async function loadProfile() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('userId'); // Changed from 'id' to 'userId'
+
+            if (!userId) {
+                // Check if user is logged in via authToken
+                const authToken = localStorage.getItem('authToken');
+                const storedUserId = localStorage.getItem('userId');
+                
+                if (authToken && storedUserId) {
+                    await fetchProfile(storedUserId);
+                } else {
+                    alert('Please log in to view your profile');
+                    window.location.href = '/';
+                }
+            } else {
+                await fetchProfile(userId);
+            }
+        }
+
+        async function fetchProfile(userId) {
+            try {
+                const response = await fetch(`${API_BASE}/user?userId=${userId}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayProfile(data.user);
+                } else {
+                    alert('Profile not found');
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                alert('Error loading profile');
+            }
+        }
+
+        function displayProfile(user) {
+            document.getElementById('profileAvatar').src = user.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.username;
+            document.getElementById('profileUsername').textContent = user.username;
+            document.getElementById('profileEmail').textContent = user.email || '';
+            document.getElementById('memberSince').textContent = new Date(user.memberSince).toLocaleDateString();
+            document.getElementById('winRate').textContent = user.winRate + '%';
+            document.getElementById('profileBalance').textContent = '$' + (user.balance || 0).toFixed(2);
+            document.getElementById('profileWins').textContent = user.wins;
+            document.getElementById('profileLosses').textContent = user.losses;
+            document.getElementById('profileWagered').textContent = '$' + (user.totalWagered || 0).toFixed(0);
+            document.getElementById('profileWon').textContent = '$' + (user.totalWon || 0).toFixed(0);
+
+            // Update Clash Royale link status
+            if (user.clashRoyaleTag) {
+                document.getElementById('clashRoyaleLinked').style.display = 'block';
+                document.getElementById('clashRoyaleNotLinked').style.display = 'none';
+                document.getElementById('clashRoyaleTag').textContent = user.clashRoyaleTag;
+                document.getElementById('clashRoyaleName').textContent = user.clashRoyaleName || 'Unknown';
+                document.getElementById('showClashRoyaleLinkBtn').style.display = 'none';
+                document.getElementById('unlinkClashRoyaleBtn').style.display = 'block';
+                
+                // Load match history if tag is linked
+                loadMatchHistory(user.clashRoyaleTag);
+            } else {
+                document.getElementById('clashRoyaleLinked').style.display = 'none';
+                document.getElementById('clashRoyaleNotLinked').style.display = 'block';
+                document.getElementById('showClashRoyaleLinkBtn').style.display = 'block';
+                document.getElementById('unlinkClashRoyaleBtn').style.display = 'none';
+            }
+        }
+
+        async function loadMatchHistory(clashRoyaleTag) {
+            const matchHistoryEl = document.getElementById('matchHistory');
+            matchHistoryEl.innerHTML = '<div class="empty-state">Loading match history...</div>';
+
+            try {
+                const cleanTag = clashRoyaleTag.replace(/^#/, '').toUpperCase();
+                const response = await fetch(`${API_BASE}/matches/history?tag=${cleanTag}`);
+                const data = await response.json();
+
+                if (response.ok && data.battles && data.battles.length > 0) {
+                    matchHistoryEl.innerHTML = data.battles.map(battle => `
+                        <div style="background: rgba(0, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <span style="font-family: monospace; color: var(--cyan); background: rgba(0, 255, 255, 0.1); padding: 0.25rem 0.5rem; border-radius: 4px;">#${cleanTag}</span>
+                                <span style="color: var(--text-primary); font-weight: 600;">${battle.playerName}</span>
+                                <span style="color: var(--text-muted); font-size: 1.5rem;">VS</span>
+                                <span style="font-family: monospace; color: var(--green); background: rgba(0, 255, 0, 0.1); padding: 0.25rem 0.5rem; border-radius: 4px;">${battle.opponentTag}</span>
+                                <span style="color: var(--text-primary); font-weight: 600;">${battle.opponentName}</span>
+                            </div>
+                            <span style="padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; ${battle.outcome === 'win' ? 'background: rgba(0, 255, 0, 0.2); color: var(--success);' : battle.outcome === 'loss' ? 'background: rgba(255, 0, 0, 0.2); color: var(--danger);' : 'background: rgba(128, 128, 128, 0.2); color: var(--text-muted);'}">
+                                ${battle.outcome.toUpperCase()}
+                            </span>
+                        </div>
+                    `).join('');
+                } else {
+                    matchHistoryEl.innerHTML = '<div class="empty-state">No recent matches found!</div>';
+                }
+            } catch (error) {
+                console.error('Error loading match history:', error);
+                matchHistoryEl.innerHTML = '<div class="empty-state">Failed to load match history</div>';
+            }
+        }
+
+        function showClashRoyaleInput() {
+            document.getElementById('showClashRoyaleLinkBtn').style.display = 'none';
+            document.getElementById('clashRoyaleInputGroup').style.display = 'flex';
+        }
+
+        async function linkClashRoyale() {
+            const tag = document.getElementById('clashRoyaleInput').value.trim();
+            const errorEl = document.getElementById('clashRoyaleError');
+            const successEl = document.getElementById('clashRoyaleSuccess');
+            
+            errorEl.style.display = 'none';
+            successEl.style.display = 'none';
+
+            if (!tag) {
+                errorEl.textContent = 'Please enter a valid player tag';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const authToken = localStorage.getItem('authToken');
+
+            if (!authToken) {
+                errorEl.textContent = 'You must be logged in to link accounts';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/user/link-clashroyale`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ clashRoyaleTag: tag })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    successEl.style.display = 'block';
+                    document.getElementById('clashRoyaleInputGroup').style.display = 'none';
+                    
+                    // Update UI without page refresh
+                    document.getElementById('clashRoyaleLinked').style.display = 'block';
+                    document.getElementById('clashRoyaleNotLinked').style.display = 'none';
+                    document.getElementById('clashRoyaleTag').textContent = tag;
+                    document.getElementById('clashRoyaleName').textContent = data.clashRoyaleName || 'Loading...';
+                    document.getElementById('showClashRoyaleLinkBtn').style.display = 'none';
+                    document.getElementById('unlinkClashRoyaleBtn').style.display = 'block';
+                    
+                    // Load match history
+                    setTimeout(() => {
+                        loadMatchHistory(tag);
+                    }, 500);
+                } else {
+                    errorEl.textContent = data.error || 'Failed to link account';
+                    errorEl.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error linking account:', error);
+                errorEl.textContent = 'Network error. Please try again.';
+                errorEl.style.display = 'block';
+            }
+        }
+
+        async function unlinkClashRoyale() {
+            const authToken = localStorage.getItem('authToken');
+
+            if (!authToken) {
+                alert('You must be logged in');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to unlink your Clash Royale account?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/user/link-clashroyale`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ clashRoyaleTag: '' })
+                });
+
+                if (response.ok) {
+                    // Update UI without page refresh
+                    document.getElementById('clashRoyaleLinked').style.display = 'none';
+                    document.getElementById('clashRoyaleNotLinked').style.display = 'block';
+                    document.getElementById('showClashRoyaleLinkBtn').style.display = 'block';
+                    document.getElementById('unlinkClashRoyaleBtn').style.display = 'none';
+                    document.getElementById('clashRoyaleTag').textContent = '';
+                    document.getElementById('clashRoyaleName').textContent = '';
+                    
+                    // Clear match history
+                    document.getElementById('matchHistory').innerHTML = '<div class="empty-state">Link your Clash Royale account to see match history!</div>';
+                }
+            } catch (error) {
+                console.error('Error unlinking account:', error);
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProfile();
+            
+            document.getElementById('linkClashRoyaleBtn')?.addEventListener('click', linkClashRoyale);
+            document.getElementById('unlinkClashRoyaleBtn')?.addEventListener('click', unlinkClashRoyale);
+            
+            // Allow Enter key to submit
+            document.getElementById('clashRoyaleInput')?.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    linkClashRoyale();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

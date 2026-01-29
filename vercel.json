@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "buildCommand": "echo 'No build needed'",
+  "devCommand": "vercel dev",
+  "installCommand": "npm install",
+  "framework": null,
+  "outputDirectory": ".",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    }
+  ]
+}

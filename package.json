@@ -1,0 +1,30 @@
+{
+  "name": "compearner",
+  "version": "1.0.0",
+  "description": "Competitive gaming wagering platform",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Build complete'",
+    "start": "vercel dev",
+    "setup": "node setup.js",
+    "test": "node test-setup.js"
+  },
+  "keywords": [
+    "gaming",
+    "esports",
+    "wagering"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@sparticuz/chromium": "^143.0.4",
+    "@vercel/kv": "^1.0.1",
+    "bcryptjs": "^2.4.3",
+    "cheerio": "^1.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^2.7.0",
+    "puppeteer-core": "^24.36.1",
+    "uuid": "^9.0.1"
+  }
+}

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CompEarner - Competitive Gaming Wagers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Google Sign-In -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-icon">⚡</span>
+                <span class="brand-text">COMPEARNER</span>
+            </div>
+            
+            <div class="nav-links" id="navLinks">
+                <a href="#matches">Matches</a>
+                <a href="#leaderboard">Leaderboard</a>
+                <a href="#how-it-works">How It Works</a>
+            </div>
+
+            <div class="nav-actions" id="navActions">
+                <div id="g_id_onload"
+                     data-client_id="125719721418-lfcmu2utdekm3ss2tt3ft48gpehm3le2.apps.googleusercontent.com"
+                     data-callback="handleCredentialResponse"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-size="large"
+                     data-theme="filled_black"
+                     data-text="signin_with"
+                     data-shape="rectangular"
+                     data-logo_alignment="left">
+                </div>
+            </div>
+
+            <!-- Logged in state (hidden by default) -->
+            <div class="nav-user-info hidden" id="navUserInfo">
+                <a href="profile.html" class="user-avatar" id="userProfileLink">
+                    <img id="userAvatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" alt="User">
+                    <span id="username" class="username-text">User</span>
+                </a>
+                <div class="balance-display">
+                    <span class="balance-label">Balance</span>
+                    <span class="balance-amount" id="navBalance">$0.00</span>
+                </div>
+                <div class="stats-display">
+                    <span class="stat-item wins">
+                        <span class="stat-icon">🏆</span>
+                        <span id="winsCount">0</span>
+                    </span>
+                    <span class="stat-item losses">
+                        <span class="stat-icon">💀</span>
+                        <span id="lossesCount">0</span>
+                    </span>
+                </div>
+                <button class="btn-logout" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-background"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-stats">
+                <div class="stat-badge">
+                    <span class="stat-value" id="livePlayersCount">—</span>
+                    <span class="stat-label">Total Players</span>
+                </div>
+                <div class="stat-badge">
+                    <span class="stat-value" id="totalPaidOut">$0</span>
+                    <span class="stat-label">Total Money Paid Out</span>
+                </div>
+            </div>
+            
+            <h1 class="hero-title">
+                <span class="title-line-1">COMPETE</span>
+                <span class="title-line-2">WAGER</span>
+                <span class="title-line-3">WIN</span>
+            </h1>
+            
+            <p class="hero-subtitle">
+                Challenge players worldwide in competitive 1v1 matches. Put your skills on the line and earn real rewards.
+            </p>
+            
+            <div class="hero-cta">
+                <button class="btn-hero glow-btn" id="heroGetStartedBtn">
+                    <span>GET STARTED</span>
+                    <span class="btn-arrow">→</span>
+                </button>
+                <button class="btn-secondary">
+                    <span>Watch Trailer</span>
+                </button>
+            </div>
+
+            <div class="supported-games">
+                <span class="games-label">Supported Games:</span>
+                <div class="game-icons">
+                    <span class="game-icon">👑 Clash Royale</span>
+                    <span class="game-icon">🎮 CS2</span>
+                    <span class="game-icon">🎯 Valorant</span>
+                    <span class="game-icon">🏀 NBA 2K</span>
+                    <span class="game-icon">⚽ FIFA</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="hero-decoration">
+            <div class="cyber-line cyber-line-1"></div>
+            <div class="cyber-line cyber-line-2"></div>
+            <div class="cyber-line cyber-line-3"></div>
+        </div>
+    </section>
+
+    <!-- Match Lobby Section -->
+    <section class="match-lobby" id="matches">
+        <div class="lobby-container">
+            <div class="info-banner" id="clashRoyaleInfo" style="display: none;">
+                <div class="info-icon">👑</div>
+                <div class="info-content">
+                    <strong>Clash Royale Auto-Verification!</strong>
+                    <p>Link your Clash Royale account in your profile to enable automatic match verification. After playing, just click "Verify Match" and we'll check the API automatically!</p>
+                </div>
+                <button class="info-close" onclick="document.getElementById('clashRoyaleInfo').style.display='none'">×</button>
+            </div>
+
+            <div class="lobby-header">
+                <div class="header-content">
+                    <h2 class="section-title">ACTIVE MATCHES</h2>
+                    <p class="section-subtitle">Join an existing match or create your own</p>
+                </div>
+                <button class="btn-create-match glow-btn" id="createMatchBtn">
+                    <span>+ CREATE MATCH</span>
+                </button>
+            </div>
+
+            <div class="match-filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="open">Open</button>
+                <button class="filter-btn" data-filter="in-progress">In Progress</button>
+                <button class="filter-btn" data-filter="clashroyale">Clash Royale</button>
+                <button class="filter-btn" data-filter="cs2">CS2</button>
+                <button class="filter-btn" data-filter="valorant">Valorant</button>
+            </div>
+
+            <div class="match-grid" id="matchGrid">
+                <!-- Match cards will be dynamically inserted here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Create Match Modal -->
+    <div class="modal-overlay hidden" id="createMatchModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">CREATE MATCH</h3>
+                <button class="modal-close" id="closeModalBtn">×</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Game</label>
+                    <select class="form-select" id="gameSelect">
+                        <option value="clashroyale">Clash Royale 👑</option>
+                        <option value="cs2">Counter-Strike 2</option>
+                        <option value="valorant">Valorant</option>
+                        <option value="nba2k">NBA 2K24</option>
+                        <option value="fifa">FIFA 24</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Game Mode</label>
+                    <select class="form-select" id="modeSelect">
+                        <option value="1v1">1v1</option>
+                        <option value="2v2">2v2</option>
+                        <option value="5v5">5v5</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Entry Fee</label>
+                    <div class="entry-fee-options">
+                        <button class="fee-option" data-fee="10">$10</button>
+                        <button class="fee-option active" data-fee="25">$25</button>
+                        <button class="fee-option" data-fee="50">$50</button>
+                        <button class="fee-option" data-fee="100">$100</button>
+                        <button class="fee-option" data-fee="custom">Custom</button>
+                    </div>
+                    <input type="number" class="form-input hidden" id="customFeeInput" placeholder="Enter custom amount" min="5" max="1000">
+                </div>
+
+                <div class="prize-display">
+                    <div class="prize-info">
+                        <span class="prize-label">Potential Winnings</span>
+                        <span class="prize-amount" id="prizeAmount">$47.50</span>
+                    </div>
+                    <span class="prize-note">(5% platform fee)</span>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelModalBtn">Cancel</button>
+                <button class="btn-primary glow-btn" id="confirmCreateBtn">Create Match</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <span class="brand-icon">⚡</span>
+                <span class="brand-text">COMPEARNER</span>
+                <p class="footer-tagline">Where skills meet rewards</p>
+            </div>
+            
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Platform</h4>
+                    <a href="#">How It Works</a>
+                    <a href="#">Supported Games</a>
+                    <a href="#">Leaderboard</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Support</h4>
+                    <a href="#">FAQ</a>
+                    <a href="#">Contact</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Community</h4>
+                    <a href="#">Discord</a>
+                    <a href="#">Twitter</a>
+                    <a href="#">Twitch</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 CompEarner. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="google-config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

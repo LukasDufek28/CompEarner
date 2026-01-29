@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - CompEarner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: calc(var(--nav-height) + 2rem) 2rem 2rem;
+            min-height: 100vh;
+        }
+
+        .admin-header {
+            margin-bottom: 3rem;
+        }
+
+        .admin-title {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--cyan), var(--green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .admin-subtitle {
+            color: var(--text-secondary);
+        }
+
+        .login-form {
+            max-width: 400px;
+            margin: 6rem auto;
+            padding: 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 240, 255, 0.2);
+        }
+
+        .login-form h2 {
+            font-family: var(--font-display);
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, var(--cyan), var(--green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--cyan);
+            transform: translateY(-2px);
+        }
+
+        .stat-card-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card-value {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--cyan);
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .admin-tab {
+            padding: 1rem 2rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: var(--font-display);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .admin-tab.active {
+            color: var(--cyan);
+            border-bottom-color: var(--cyan);
+        }
+
+        .admin-section {
+            display: none;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+        .match-table {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 2fr;
+            padding: 1rem;
+            background: var(--bg-elevated);
+            font-family: var(--font-display);
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 2fr;
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .table-row:hover {
+            background: var(--bg-elevated);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge.open {
+            background: rgba(57, 255, 20, 0.2);
+            color: var(--green);
+        }
+
+        .status-badge.in-progress {
+            background: rgba(255, 170, 0, 0.2);
+            color: var(--warning);
+        }
+
+        .status-badge.completed {
+            background: rgba(0, 240, 255, 0.2);
+            color: var(--cyan);
+        }
+
+        .status-badge.cancelled {
+            background: rgba(255, 51, 102, 0.2);
+            color: var(--danger);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-finalize {
+            background: var(--green);
+            color: var(--bg-primary);
+        }
+
+        .btn-finalize:hover {
+            box-shadow: 0 5px 15px var(--green-glow);
+            transform: translateY(-2px);
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 51, 102, 0.1);
+        }
+
+        .finalize-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .finalize-modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .player-option {
+            padding: 1.5rem;
+            background: var(--bg-elevated);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .player-option:hover {
+            border-color: var(--cyan);
+            background: rgba(0, 240, 255, 0.05);
+        }
+
+        .player-option.selected {
+            border-color: var(--green);
+            background: rgba(57, 255, 20, 0.1);
+        }
+
+        .error-message {
+            padding: 1rem;
+            background: rgba(255, 51, 102, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            color: var(--danger);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-icon">⚡</span>
+                <span class="brand-text">COMPEARNER ADMIN</span>
+            </div>
+            
+            <div class="nav-actions">
+                <button class="btn-secondary" id="logoutBtn" style="display: none;">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Form -->
+    <div id="loginSection">
+        <div class="login-form">
+            <h2>ADMIN LOGIN</h2>
+            <div id="loginError" class="error-message hidden"></div>
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" id="username" class="form-input" placeholder="Enter username">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" id="password" class="form-input" placeholder="Enter password">
+            </div>
+            <button class="btn-primary glow-btn" id="loginBtn" style="width: 100%;">Login</button>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="hidden">
+        <div class="admin-container">
+            <div class="admin-header">
+                <h1 class="admin-title">ADMIN DASHBOARD</h1>
+                <p class="admin-subtitle">Manage matches, finalize games, and process payouts</p>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-card-label">Total Matches</div>
+                    <div class="stat-card-value" id="statTotalMatches">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-label">In Progress</div>
+                    <div class="stat-card-value" id="statInProgress">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-label">Completed</div>
+                    <div class="stat-card-value" id="statCompleted">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-label">Active Prize Pool</div>
+                    <div class="stat-card-value" id="statPrizePool">$0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-label">Total Paid Out</div>
+                    <div class="stat-card-value" id="statPaidOut" style="color: var(--green);">$0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-label">Platform Fees</div>
+                    <div class="stat-card-value" id="statFees" style="color: var(--purple);">$0</div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-tab="in-progress">In Progress</button>
+                <button class="admin-tab" data-tab="open">Open Matches</button>
+                <button class="admin-tab" data-tab="completed">Completed</button>
+                <button class="admin-tab" data-tab="all">All Matches</button>
+            </div>
+
+            <!-- Match Tables -->
+            <div id="inProgressSection" class="admin-section active">
+                <div class="match-table">
+                    <div class="table-header">
+                        <div>Game</div>
+                        <div>Mode</div>
+                        <div>Player 1</div>
+                        <div>Player 2</div>
+                        <div>Entry Fee</div>
+                        <div>Prize</div>
+                        <div>Actions</div>
+                    </div>
+                    <div id="inProgressMatches"></div>
+                </div>
+            </div>
+
+            <div id="openSection" class="admin-section">
+                <div class="match-table">
+                    <div class="table-header">
+                        <div>Game</div>
+                        <div>Mode</div>
+                        <div>Player 1</div>
+                        <div>Player 2</div>
+                        <div>Entry Fee</div>
+                        <div>Prize</div>
+                        <div>Actions</div>
+                    </div>
+                    <div id="openMatches"></div>
+                </div>
+            </div>
+
+            <div id="completedSection" class="admin-section">
+                <div class="match-table">
+                    <div class="table-header">
+                        <div>Game</div>
+                        <div>Mode</div>
+                        <div>Winner</div>
+                        <div>Loser</div>
+                        <div>Entry Fee</div>
+                        <div>Prize</div>
+                        <div>Finalized</div>
+                    </div>
+                    <div id="completedMatches"></div>
+                </div>
+            </div>
+
+            <div id="allSection" class="admin-section">
+                <div class="match-table">
+                    <div class="table-header">
+                        <div>Game</div>
+                        <div>Status</div>
+                        <div>Player 1</div>
+                        <div>Player 2</div>
+                        <div>Entry Fee</div>
+                        <div>Prize</div>
+                        <div>Actions</div>
+                    </div>
+                    <div id="allMatches"></div>
+                </div>
+            </div>
+
+            <!-- All Users Table -->
+            <div class="admin-section active" id="usersSection">
+                <h2 style="margin-bottom:1rem;">All Registered Users</h2>
+                <div class="match-table" id="usersTable">
+                    <div class="table-header" style="grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr 1fr;">
+                        <div>User ID</div>
+                        <div>Username</div>
+                        <div>Email</div>
+                        <div>Balance</div>
+                        <div>Wins</div>
+                        <div>Losses</div>
+                        <div>Joined</div>
+                    </div>
+                    <div id="usersTableBody"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Finalize Match Modal -->
+    <div id="finalizeModal" class="finalize-modal hidden">
+        <div class="finalize-modal-content">
+            <h3 class="modal-title">DECLARE WINNER</h3>
+            <div id="finalizeError" class="error-message hidden"></div>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Select the winner of this match:</p>
+            <div id="playerOptions"></div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelFinalizeBtn">Cancel</button>
+                <button class="btn-primary glow-btn" id="confirmFinalizeBtn">Finalize & Pay Winner</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin-script.js"></script>
+</body>
+</html>
