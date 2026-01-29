@@ -286,7 +286,13 @@
         <div class="profile-header">
             <img src="" alt="Profile" class="profile-avatar" id="profileAvatar">
             <div class="profile-info">
-                <h1 class="profile-username" id="profileUsername">Loading...</h1>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <h1 class="profile-username" id="profileUsername">Loading...</h1>
+                    <input type="text" id="editUsernameInput" style="display:none; font-size:1.5rem; padding:0.2rem 0.5rem; border-radius:6px; border:1px solid var(--border); min-width:120px;">
+                    <button class="btn-link" id="editUsernameBtn" style="font-size:1rem; padding:0.4rem 1rem;">Edit</button>
+                    <button class="btn-link" id="saveUsernameBtn" style="display:none; font-size:1rem; padding:0.4rem 1rem;">Save</button>
+                </div>
+                <div id="usernameChangeMsg" style="color:var(--danger);margin-top:0.5rem;display:none;"></div>
                 <p style="color: var(--text-secondary);" id="profileEmail"></p>
                 <div class="profile-stats-row">
                     <div class="profile-stat">
@@ -371,6 +377,95 @@
     </div>
 
     <script>
+                // === USERNAME CHANGE ===
+                document.addEventListener('DOMContentLoaded', () => {
+                    const editBtn = document.getElementById('editUsernameBtn');
+                    const saveBtn = document.getElementById('saveUsernameBtn');
+                    const usernameEl = document.getElementById('profileUsername');
+                    const inputEl = document.getElementById('editUsernameInput');
+                    const msgEl = document.getElementById('usernameChangeMsg');
+                    let editing = false;
+                    if (editBtn && saveBtn && usernameEl && inputEl && msgEl) {
+                        editBtn.addEventListener('click', () => {
+                            if (editing) return;
+                            editing = true;
+                            inputEl.value = usernameEl.textContent;
+                            usernameEl.style.display = 'none';
+                            inputEl.style.display = 'inline-block';
+                            editBtn.style.display = 'none';
+                            saveBtn.style.display = 'inline-block';
+                            msgEl.style.display = 'none';
+                            inputEl.focus();
+                        });
+                        saveBtn.addEventListener('click', async () => {
+                            const newUsername = inputEl.value.trim();
+                            if (!newUsername || newUsername.length < 3 || newUsername.length > 20) {
+                                msgEl.textContent = 'Username must be 3-20 characters.';
+                                msgEl.style.display = 'block';
+                                msgEl.style.color = 'var(--danger)';
+                                return;
+                            }
+                            if (newUsername === usernameEl.textContent) {
+                                msgEl.textContent = 'No changes made.';
+                                msgEl.style.display = 'block';
+                                msgEl.style.color = 'var(--danger)';
+                                return;
+                            }
+                            const authToken = localStorage.getItem('authToken');
+                            if (!authToken) {
+                                msgEl.textContent = 'You must be logged in.';
+                                msgEl.style.display = 'block';
+                                msgEl.style.color = 'var(--danger)';
+                                return;
+                            }
+                            saveBtn.disabled = true;
+                            try {
+                                const response = await fetch(`${API_BASE}/user`, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${authToken}`
+                                    },
+                                    body: JSON.stringify({ username: newUsername })
+                                });
+                                const data = await response.json();
+                                if (response.ok && data.user) {
+                                    usernameEl.textContent = data.user.username;
+                                    msgEl.textContent = 'Username updated!';
+                                    msgEl.style.color = 'var(--success)';
+                                    msgEl.style.display = 'block';
+                                    inputEl.style.display = 'none';
+                                    usernameEl.style.display = 'inline-block';
+                                    editBtn.style.display = 'inline-block';
+                                    saveBtn.style.display = 'none';
+                                    editing = false;
+                                } else {
+                                    msgEl.textContent = data.error || 'Failed to update username.';
+                                    msgEl.style.color = 'var(--danger)';
+                                    msgEl.style.display = 'block';
+                                }
+                            } catch (e) {
+                                msgEl.textContent = 'Network error.';
+                                msgEl.style.color = 'var(--danger)';
+                                msgEl.style.display = 'block';
+                            }
+                            saveBtn.disabled = false;
+                        });
+                        inputEl.addEventListener('keypress', (e) => {
+                            if (e.key === 'Enter') saveBtn.click();
+                        });
+                        document.addEventListener('click', (e) => {
+                            if (editing && !inputEl.contains(e.target) && e.target !== editBtn && e.target !== saveBtn) {
+                                inputEl.style.display = 'none';
+                                usernameEl.style.display = 'inline-block';
+                                editBtn.style.display = 'inline-block';
+                                saveBtn.style.display = 'none';
+                                msgEl.style.display = 'none';
+                                editing = false;
+                            }
+                        });
+                    }
+                });
         const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:3000/api'
             : '/api';
@@ -453,20 +548,43 @@
                 const data = await response.json();
 
                 if (response.ok && data.battles && data.battles.length > 0) {
-                    matchHistoryEl.innerHTML = data.battles.map(battle => `
+                    matchHistoryEl.innerHTML = data.battles.map(battle => {
+                        // Simulate RoyaleAPI UTC string if present in battle.utcTime or battle.utc or battle.utc_date
+                        // For demo, use battle.utcTime || battle.utc || battle.utc_date || a fallback
+                        const utcString = battle.utcTime || battle.utc || battle.utc_date || battle.utc_string || battle.utc || battle.dateUTC || battle.date || '2026-01-28 16:50:19 UTC';
+                        let parsedDate = '';
+                        if (utcString) {
+                            // Accept both '2026-01-28 16:50:19 UTC' and ISO
+                            let dateObj = null;
+                            if (utcString.endsWith('UTC')) {
+                                dateObj = new Date(utcString.replace(' UTC', 'Z'));
+                            } else {
+                                dateObj = new Date(utcString);
+                            }
+                            if (!isNaN(dateObj)) {
+                                parsedDate = dateObj.toLocaleString();
+                            }
+                        }
+                        return `
                         <div style="background: rgba(0, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <span style="font-family: monospace; color: var(--cyan); background: rgba(0, 255, 255, 0.1); padding: 0.25rem 0.5rem; border-radius: 4px;">#${cleanTag}</span>
-                                <span style="color: var(--text-primary); font-weight: 600;">${battle.playerName}</span>
-                                <span style="color: var(--text-muted); font-size: 1.5rem;">VS</span>
-                                <span style="font-family: monospace; color: var(--green); background: rgba(0, 255, 0, 0.1); padding: 0.25rem 0.5rem; border-radius: 4px;">${battle.opponentTag}</span>
-                                <span style="color: var(--text-primary); font-weight: 600;">${battle.opponentName}</span>
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <span style="font-family: monospace; color: var(--cyan); background: rgba(0, 255, 255, 0.1); padding: 0.25rem 0.5rem; border-radius: 4px;">#${cleanTag}</span>
+                                    <span style="color: var(--text-primary); font-weight: 600;">${battle.playerName}</span>
+                                    <span style="color: var(--text-muted); font-size: 1.5rem;">VS</span>
+                                    <span style="font-family: monospace; color: var(--green); background: rgba(0, 255, 0, 0.1); padding: 0.25rem 0.5rem; border-radius: 4px;">${battle.opponentTag}</span>
+                                    <span style="color: var(--text-primary); font-weight: 600;">${battle.opponentName}</span>
+                                </div>
+                                <div style="font-size:0.95rem; color:var(--text-secondary);">
+                                    <b>UTC:</b> <span>${utcString}</span> &nbsp;|&nbsp; <b>Local:</b> <span>${parsedDate}</span>
+                                </div>
                             </div>
                             <span style="padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; ${battle.outcome === 'win' ? 'background: rgba(0, 255, 0, 0.2); color: var(--success);' : battle.outcome === 'loss' ? 'background: rgba(255, 0, 0, 0.2); color: var(--danger);' : 'background: rgba(128, 128, 128, 0.2); color: var(--text-muted);'}">
                                 ${battle.outcome.toUpperCase()}
                             </span>
                         </div>
-                    `).join('');
+                        `;
+                    }).join('');
                 } else {
                     matchHistoryEl.innerHTML = '<div class="empty-state">No recent matches found!</div>';
                 }

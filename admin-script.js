@@ -417,7 +417,7 @@ async function loadAllUsers() {
         users.forEach(user => {
             const row = document.createElement('div');
             row.className = 'table-row';
-            row.style.gridTemplateColumns = '2fr 2fr 1fr 1fr 1fr 1fr 1fr';
+            row.style.gridTemplateColumns = '2fr 2fr 1fr 1fr 1fr 1fr 1fr 1fr';
             row.innerHTML = `
                 <div title="${user.userId}">${user.userId}</div>
                 <div>${user.username}</div>
@@ -426,9 +426,65 @@ async function loadAllUsers() {
                 <div>${user.wins}</div>
                 <div>${user.losses}</div>
                 <div>${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : ''}</div>
+                <div><button class="btn-secondary set-balance-btn" data-userid="${user.userId}" data-username="${user.username}" data-balance="${user.balance}">Set Balance</button></div>
             `;
             tbody.appendChild(row);
         });
+        // Add event listeners for set balance buttons
+        document.querySelectorAll('.set-balance-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                showSetBalanceModal(btn.dataset.userid, btn.dataset.username, btn.dataset.balance);
+            });
+        });
+    // === SET BALANCE MODAL ===
+    let setBalanceUserId = null;
+    function showSetBalanceModal(userId, username, balance) {
+        setBalanceUserId = userId;
+        const modal = document.getElementById('setBalanceModal');
+        const amountInput = document.getElementById('setBalanceAmount');
+        const errorDiv = document.getElementById('setBalanceError');
+        errorDiv.classList.add('hidden');
+        errorDiv.textContent = '';
+        amountInput.value = parseFloat(balance).toFixed(2);
+        modal.classList.remove('hidden');
+    }
+
+    document.getElementById('cancelSetBalanceBtn').addEventListener('click', () => {
+        document.getElementById('setBalanceModal').classList.add('hidden');
+    });
+
+    document.getElementById('confirmSetBalanceBtn').addEventListener('click', async () => {
+        const amountInput = document.getElementById('setBalanceAmount');
+        const errorDiv = document.getElementById('setBalanceError');
+        let newBalance = parseFloat(amountInput.value);
+        if (isNaN(newBalance) || newBalance < 0) {
+            errorDiv.textContent = 'Enter a valid balance.';
+            errorDiv.classList.remove('hidden');
+            return;
+        }
+        try {
+            const response = await fetch(`${API_BASE}/admin?action=set-balance`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId: setBalanceUserId, newBalance })
+            });
+            if (!response.ok) {
+                const data = await response.json();
+                errorDiv.textContent = data.error || 'Failed to set balance.';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+            document.getElementById('setBalanceModal').classList.add('hidden');
+            showNotification('Balance updated successfully!', 'success');
+            loadAllUsers();
+        } catch (e) {
+            errorDiv.textContent = 'Connection error.';
+            errorDiv.classList.remove('hidden');
+        }
+    });
     } catch (e) { /* ignore */ }
 }
 

@@ -1,4 +1,3 @@
-
 const { handleCors } = require('../lib/auth');
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
@@ -95,12 +94,24 @@ async function handler(req, res) {
                 outcome = 'loss';
             }
 
+            // Extract UTC date from .battle-timestamp-popup
+            let utcString = null;
+            // Look for the closest .battle-timestamp-popup element inside or near the container
+            let $timestamp = $container.find('.battle-timestamp-popup').first();
+            if (!$timestamp.length) {
+                $timestamp = $container.parents().find('.battle-timestamp-popup').first();
+            }
+            if ($timestamp.length) {
+                utcString = $timestamp.attr('data-content') || null;
+            }
+
             battles.push({
                 playerTag: `#${cleanTag}`,
                 playerName: 'You',
                 opponentTag,
                 opponentName,
-                outcome
+                outcome,
+                utcString // <-- add UTC string for frontend parsing
             });
             uniqueCount++;
         }

@@ -92,12 +92,23 @@ async function handler(req, res) {
                         } else if (opponentCrowns > crowns) {
                             outcome = 'loss';
                         }
+                        // Extract UTC date from .battle-timestamp-popup
+                        let utcString = null;
+                        let $timestamp = $container.find('.battle-timestamp-popup').first();
+                        if (!$timestamp.length) {
+                            $timestamp = $container.parents().find('.battle-timestamp-popup').first();
+                        }
+                        if ($timestamp.length) {
+                            utcString = $timestamp.attr('data-content') || null;
+                        }
+
                         battles.push({
                             playerTag: `#${cleanTag}`,
                             playerName: 'You',
                             opponentTag,
                             opponentName,
-                            outcome
+                            outcome,
+                            battleTime: utcString // ISO string or null
                         });
                         uniqueCount++;
                     }
@@ -110,12 +121,26 @@ async function handler(req, res) {
                     fetchBattles(user2.clashRoyaleTag)
                 ]);
 
-                // Look for a match between these two users in either's recent battles
+
+                // Look for a match between these two users in either's recent battles, and check battleTime
                 let foundMatch = null;
                 let winnerUserId = null;
                 let draw = false;
+                const matchStartTime = match.startTime || match.joinTime || match.createdAt;
+                function isBattleAfterMatch(battle) {
+                    if (!battle.battleTime) return false;
+                    // battleTime is usually ISO or UTC string
+                    const battleDate = new Date(battle.battleTime);
+                    const matchDate = new Date(matchStartTime);
+                    // Only allow if battle is after match start and within 1 hour
+                    const maxDelayMs = 60 * 60 * 1000; // 1 hour
+                    return battleDate >= matchDate && (battleDate - matchDate) <= maxDelayMs;
+                }
                 for (const battle of battles1) {
-                    if (battle.opponentTag.replace(/^#/, '').toUpperCase() === user2.clashRoyaleTag.replace(/^#/, '').toUpperCase()) {
+                    if (
+                        battle.opponentTag.replace(/^#/, '').toUpperCase() === user2.clashRoyaleTag.replace(/^#/, '').toUpperCase()
+                        && isBattleAfterMatch(battle)
+                    ) {
                         foundMatch = battle;
                         if (battle.outcome === 'win') winnerUserId = user1.userId;
                         else if (battle.outcome === 'loss') winnerUserId = user2.userId;
@@ -125,7 +150,10 @@ async function handler(req, res) {
                 }
                 if (!foundMatch) {
                     for (const battle of battles2) {
-                        if (battle.opponentTag.replace(/^#/, '').toUpperCase() === user1.clashRoyaleTag.replace(/^#/, '').toUpperCase()) {
+                        if (
+                            battle.opponentTag.replace(/^#/, '').toUpperCase() === user1.clashRoyaleTag.replace(/^#/, '').toUpperCase()
+                            && isBattleAfterMatch(battle)
+                        ) {
                             foundMatch = battle;
                             if (battle.outcome === 'win') winnerUserId = user2.userId;
                             else if (battle.outcome === 'loss') winnerUserId = user1.userId;
@@ -137,7 +165,7 @@ async function handler(req, res) {
 
                 if (!foundMatch) {
                     // Do NOT close the match if not verified
-                    return res.status(404).json({ error: 'No recent match found between these players. Match remains open.' });
+                    return res.status(404).json({ error: 'No valid match found: battle must be after match start time.' });
                 }
 
                 // Only update match if a winner or draw is found
@@ -272,6 +300,8 @@ async function handler(req, res) {
                     player2: null,
                     winner: null,
                     createdAt: new Date().toISOString(),
+                    joinTime: null, // when player2 joins
+                    startTime: null, // when match starts (same as joinTime for now)
                     finalizedAt: null
                 };
 
@@ -340,6 +370,8 @@ async function handler(req, res) {
                     avatar: user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`
                 };
                 match.status = 'in-progress';
+                match.joinTime = new Date().toISOString();
+                match.startTime = match.joinTime;
                 await setMatch(matchId, match);
 
                 await logTransaction({

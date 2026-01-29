@@ -4,6 +4,43 @@ const { initDB, getMatch, setMatch, getUser, setUser, logTransaction, getAllMatc
 
 async function handler(req, res) {
     // POST /api/admin?action=login - Admin login
+    // PATCH /api/admin?action=set-balance - Set user balance
+    if (req.method === 'PATCH') {
+        const url = new URL(req.url, `http://${req.headers.host}`);
+        const action = url.searchParams.get('action');
+
+        // Only allow authenticated admin
+        return requireAuth(async (authReq, authRes) => {
+            await initDB();
+            if (action === 'set-balance') {
+                try {
+                    const { userId, newBalance } = req.body;
+                    if (!userId || typeof newBalance !== 'number') {
+                        return res.status(400).json({ error: 'userId and newBalance (number) required' });
+                    }
+                    const user = await getUser(userId);
+                    if (!user) {
+                        return res.status(404).json({ error: 'User not found' });
+                    }
+                    user.balance = newBalance;
+                    await setUser(userId, user);
+                    await logTransaction({
+                        type: 'admin_balance_set',
+                        userId,
+                        newBalance,
+                        admin: authReq.user?.username || 'admin',
+                        timestamp: new Date().toISOString()
+                    });
+                    return res.status(200).json({ success: true, userId, newBalance });
+                } catch (error) {
+                    console.error('Error setting balance:', error);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+            }
+            return res.status(400).json({ error: 'Invalid action for PATCH. Use ?action=set-balance' });
+        })(req, res);
+    }
+
     if (req.method === 'POST') {
         const url = new URL(req.url, `http://${req.headers.host}`);
         const action = url.searchParams.get('action');

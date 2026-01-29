@@ -385,6 +385,7 @@ async function loadMatchesFromAPI() {
             status: m.status,
             entryFee: m.entryFee,
             prizePool: m.prizePool,
+            createdAt: m.createdAt,
             player1: {
                 name: m.player1.username,
                 username: m.player1.username,
@@ -492,6 +493,31 @@ function renderMatches(filter = 'all') {
     }
     
     elements.matchGrid.innerHTML = filteredMatches.map(match => createMatchCard(match)).join('');
+    // Start/refresh all timers
+    setTimeout(() => {
+        document.querySelectorAll('.timer').forEach(el => {
+            const start = el.getAttribute('data-timer-start');
+            if (!start) return;
+            function updateTimer() {
+                const startTime = new Date(start);
+                const now = new Date();
+                let diff = Math.floor((now - startTime) / 1000);
+                if (isNaN(diff) || diff < 0) diff = 0;
+                let text = '';
+                if (diff < 60) {
+                    text = `${diff}s`;
+                } else if (diff < 3600) {
+                    text = `${Math.floor(diff/60)}m ${diff%60}s`;
+                } else {
+                    text = `${Math.floor(diff/3600)}h ${Math.floor((diff%3600)/60)}m`;
+                }
+                el.textContent = text;
+            }
+            updateTimer();
+            if (el._interval) clearInterval(el._interval);
+            el._interval = setInterval(updateTimer, 1000);
+        });
+    }, 0);
     
     // Add event listeners to join buttons
     document.querySelectorAll('.btn-join').forEach(btn => {
@@ -533,9 +559,7 @@ function createMatchCard(match) {
                 <span class="match-game">${match.game}</span>
                 <span class="match-status ${statusClass}">${statusText}</span>
             </div>
-            
             <div class="match-mode">${match.mode}</div>
-            
             <div class="match-players">
                 <div class="player-slot">
                     <img src="${match.player1.avatar}" alt="${match.player1.username || match.player1.name}" class="player-avatar">
@@ -550,7 +574,6 @@ function createMatchCard(match) {
                     }
                 </div>
             </div>
-            
             <div class="match-details">
                 <div class="detail-item">
                     <span class="detail-label">Entry Fee</span>
@@ -560,8 +583,11 @@ function createMatchCard(match) {
                     <span class="detail-label">Prize Pool</span>
                     <span class="detail-value prize-pool">$${match.prizePool}</span>
                 </div>
+                <div class="detail-item">
+                    <span class="detail-label">Time Active</span>
+                    <span class="detail-value timer" id="timer-${match.matchId || match.id}" data-timer-start="${match.startTime || match.joinTime || match.createdAt}">0s</span>
+                </div>
             </div>
-            
             <div class="match-actions">
                 ${actionButton}
             </div>
@@ -664,52 +690,60 @@ async function handleVerifyMatch(matchId) {
         return;
     }
     
-    // Check if both players have Clash Royale accounts linked
-    if (!confirm('This will check the Clash Royale API to verify the match result. Both players must have linked their Clash Royale accounts. Continue?')) {
-        return;
-    }
+    // No confirmation popup, just proceed instantly
     
-    try {
-        showNotification('🔍 Checking Clash Royale match history...', 'info');
-        
-        const response = await fetch(`${API_BASE}/matches?action=verify-clashroyale`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                matchId: match.matchId || match.id
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            if (data.verified) {
-                showNotification(`✅ Match verified! Winner: ${data.winner}. Prize: $${data.prizeAwarded}`, 'success');
-                
-                // Reload matches and user data
-                await loadMatchesFromAPI();
-                if (appState.user.userId) {
-                    const token = localStorage.getItem('authToken');
-                    const userRes = await fetch(`${API_BASE}/user?userId=${appState.user.userId}`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    const userData = await userRes.json();
-                    if (userData.success) {
-                        appState.user = userData.user;
-                        updateAuthUI();
+    // Set button to loading
+    const btn = document.querySelector(`.btn-verify[data-match-id="${matchId}"]`);
+    if (btn) {
+        btn.disabled = true;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner" style="margin-right:8px;vertical-align:middle;width:1em;height:1em;display:inline-block;border:2px solid #0ff;border-top:2px solid transparent;border-radius:50%;animation:spin 1s linear infinite;"></span>Verifying...';
+        // Add spinner animation style if not present
+        if (!document.getElementById('spinner-style')) {
+            const style = document.createElement('style');
+            style.id = 'spinner-style';
+            style.innerHTML = '@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}';
+            document.head.appendChild(style);
+        }
+        try {
+            const response = await fetch(`${API_BASE}/matches?action=verify-clashroyale`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    matchId: match.matchId || match.id
+                })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                if (data.verified) {
+                    showNotification(`✅ Match verified! Winner: ${data.winner}. Prize: $${data.prizeAwarded}`, 'success');
+                    await loadMatchesFromAPI();
+                    if (appState.user.userId) {
+                        const token = localStorage.getItem('authToken');
+                        const userRes = await fetch(`${API_BASE}/user?userId=${appState.user.userId}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        const userData = await userRes.json();
+                        if (userData.success) {
+                            appState.user = userData.user;
+                            updateAuthUI();
+                        }
                     }
+                } else {
+                    showNotification(data.message || 'Could not verify match. Please ensure both players have linked Clash Royale accounts and completed a match.', 'warning');
                 }
             } else {
-                showNotification(data.message || 'Could not verify match. Please ensure both players have linked Clash Royale accounts and completed a match.', 'warning');
+                showNotification(data.error || 'Failed to verify match', 'error');
             }
-        } else {
-            showNotification(data.error || 'Failed to verify match', 'error');
+        } catch (error) {
+            console.error('Error verifying match:', error);
+            showNotification('Network error. Please try again.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
         }
-    } catch (error) {
-        console.error('Error verifying match:', error);
-        showNotification('Network error. Please try again.', 'error');
     }
 }
 

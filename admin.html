@@ -422,7 +422,7 @@
             <div class="admin-section active" id="usersSection">
                 <h2 style="margin-bottom:1rem;">All Registered Users</h2>
                 <div class="match-table" id="usersTable">
-                    <div class="table-header" style="grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr 1fr;">
+                    <div class="table-header" style="grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr 1fr 1fr;">
                         <div>User ID</div>
                         <div>Username</div>
                         <div>Email</div>
@@ -430,8 +430,24 @@
                         <div>Wins</div>
                         <div>Losses</div>
                         <div>Joined</div>
+                        <div>Actions</div>
                     </div>
                     <div id="usersTableBody"></div>
+                    <!-- Set Balance Modal -->
+                    <div id="setBalanceModal" class="finalize-modal hidden">
+                        <div class="finalize-modal-content">
+                            <h3 class="modal-title">Set User Balance</h3>
+                            <div id="setBalanceError" class="error-message hidden"></div>
+                            <div style="margin-bottom:1rem;">
+                                <label for="setBalanceAmount">New Balance ($):</label>
+                                <input type="number" id="setBalanceAmount" min="0" step="0.01" style="width:120px; margin-left:0.5rem;">
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn-secondary" id="cancelSetBalanceBtn">Cancel</button>
+                                <button class="btn-primary glow-btn" id="confirmSetBalanceBtn">Set Balance</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
