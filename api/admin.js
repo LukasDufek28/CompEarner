@@ -271,6 +271,7 @@ async function handler(req, res) {
                     users: users.map(u => ({
                         userId: u.userId,
                         username: u.username,
+                        walletAddress: u.walletAddress || null,
                         email: u.email,
                         balance: u.balance,
                         wins: u.wins,

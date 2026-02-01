@@ -417,10 +417,11 @@ async function loadAllUsers() {
         users.forEach(user => {
             const row = document.createElement('div');
             row.className = 'table-row';
-            row.style.gridTemplateColumns = '2fr 2fr 1fr 1fr 1fr 1fr 1fr 1fr';
+            row.style.gridTemplateColumns = '2fr 2fr 2fr 1fr 1fr 1fr 1fr 1fr';
             row.innerHTML = `
                 <div title="${user.userId}">${user.userId}</div>
                 <div>${user.username}</div>
+                <div style="font-size:0.95em; color:var(--cyan); word-break:break-all;">${user.walletAddress ? user.walletAddress : '<span style=\'color:var(--text-muted);\'>No wallet</span>'}</div>
                 <div>${user.email || ''}</div>
                 <div>$${user.balance.toFixed(2)}</div>
                 <div>${user.wins}</div>

@@ -313,6 +313,14 @@
                 <div class="stat-card-value" id="profileBalance">$0.00</div>
             </div>
             <div class="stat-card">
+                <div class="stat-card-label">Crypto Wallet</div>
+                <button class="btn-link" id="phantomWalletBtn" style="margin-top:0.5rem;">Connect Phantom</button>
+                <div id="phantomWalletStatus" style="margin-top:0.5rem; color:var(--cyan); font-size:0.95rem;"></div>
+                <button class="btn-link" id="depositCryptoBtn" style="margin-top:0.5rem;">Deposit SOL</button>
+                <button class="btn-link" id="withdrawCryptoBtn" style="margin-top:0.5rem;">Withdraw SOL</button>
+                <button class="btn-link" id="disconnectWalletBtn" style="margin-top:0.5rem; background:rgba(255,0,0,0.1); color:var(--danger);">Disconnect</button>
+            </div>
+            <div class="stat-card">
                 <div class="stat-card-label">Wins</div>
                 <div class="stat-card-value" style="color: var(--success);" id="profileWins">0</div>
             </div>
@@ -375,6 +383,8 @@
             </div>
         </div>
     </div>
+
+    <script src="wallet.js"></script>
 
     <script>
                 // === USERNAME CHANGE ===
@@ -714,6 +724,7 @@
                 }
             });
         });
+        // Wallet UI handled by wallet.js to avoid duplicated event handlers
     </script>
 </body>
 </html>

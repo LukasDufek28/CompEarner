@@ -1,3 +1,10 @@
+// Remove user's wallet address
+async function removeUserWallet(userId) {
+    const user = await getUser(userId);
+    if (!user) return;
+    user.walletAddress = undefined;
+    await setUser(userId, user);
+}
 // Database helper using Vercel KV
 // If KV is not available, falls back to in-memory storage
 
@@ -118,6 +125,31 @@ async function initializeSeedData() {
     }
 }
 
+// Save user's wallet address
+async function saveUserWallet(userId, walletAddress) {
+    const user = await getUser(userId);
+    if (!user) return;
+    user.walletAddress = walletAddress;
+    await setUser(userId, user);
+}
+
+// Credit user's crypto balance
+async function creditUserBalance(userId, amount) {
+    const user = await getUser(userId);
+    if (!user) return;
+    user.balance = (user.balance || 0) + amount;
+    await setUser(userId, user);
+}
+
+// Debit user's crypto balance
+async function debitUserBalance(userId, amount) {
+    const user = await getUser(userId);
+    if (!user) return;
+    if ((user.balance || 0) < amount) throw new Error('Insufficient balance');
+    user.balance -= amount;
+    await setUser(userId, user);
+}
+
 module.exports = {
     initDB,
     getUser,
@@ -130,5 +162,9 @@ module.exports = {
     getAllMatches,
     deleteMatch,
     logTransaction,
-    initializeSeedData
+    initializeSeedData,
+    saveUserWallet,
+    creditUserBalance,
+    debitUserBalance
+    ,removeUserWallet
 };

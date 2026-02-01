@@ -180,6 +180,7 @@ async function handler(req, res) {
                     const winnerUser = await getUser(match.winner);
                     const loserUserId = (match.player1.userId === match.winner) ? match.player2.userId : match.player1.userId;
                     const loserUser = await getUser(loserUserId);
+                    // Award crypto prize
                     winnerUser.balance += match.prizePool;
                     winnerUser.wins = (winnerUser.wins || 0) + 1;
                     winnerUser.totalWon = (winnerUser.totalWon || 0) + match.prizePool;
@@ -199,6 +200,7 @@ async function handler(req, res) {
                     // Handle draw - refund both players
                     const player1 = await getUser(match.player1.userId);
                     const player2 = await getUser(match.player2.userId);
+                    // Refund crypto entry fee on draw
                     player1.balance += match.entryFee;
                     player2.balance += match.entryFee;
                     await setUser(player1.userId, player1);
@@ -279,7 +281,7 @@ async function handler(req, res) {
                     return res.status(404).json({ error: 'User not found' });
                 }
 
-                if (user.balance < fee) {
+                if ((user.balance || 0) < fee) {
                     return res.status(400).json({ error: 'Insufficient balance' });
                 }
 
@@ -357,7 +359,7 @@ async function handler(req, res) {
                     return res.status(400).json({ error: 'Cannot join your own match' });
                 }
 
-                if (user.balance < match.entryFee) {
+                if ((user.balance || 0) < match.entryFee) {
                     return res.status(400).json({ error: 'Insufficient balance' });
                 }
 
